@@ -6,11 +6,13 @@ import time
 import tweepy
 from credentials import *
 
+
 class User:
     """
     Twitter user interface. Stores username and maintains
     a local cache of the user's friends and followers.
     """
+
     def __init__(self, username):
         self.username = username
         self.friends = []
@@ -30,11 +32,10 @@ class User:
         """
         if self.friend_cache is None or not cache:
             timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-            filepath = os.path.join(self.datapath,
-            "{}-friends-{}.txt".format(self.username,timestamp))
+            fname = "{}-friends-{}.txt".format(self.username, timestamp)
+            filepath = os.path.join(self.datapath, fname)
             self.friends = self.__fetch(api.friends, filepath)
         return self.friends
-
 
     def get_followers(self, cache=True):
         """
@@ -43,8 +44,8 @@ class User:
         """
         if self.follower_cache is None or not cache:
             timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-            filepath = os.path.join(self.datapath,
-            "{}-followers-{}.txt".format(self.username,timestamp))
+            fname = "{}-followers-{}.txt".format(self.username, timestamp)
+            filepath = os.path.join(self.datapath, fname)
             self.followers = self.__fetch(api.followers, filepath)
         return self.followers
 
@@ -57,12 +58,15 @@ class User:
             users.extend(user)
         users = [users[i].screen_name for i in range(len(users))]
         with open(out_file_path, "w") as of:
-            for user in users: of.write("{}\n".format(user))
+            for user in users:
+                of.write("{}\n".format(user))
         return users
+
 
 if __name__ == "__main__":
     username = str(sys.argv[1])
     user = User(username)
     followers = user.get_followers()
     friends = user.get_friends()
-    print(friends)
+    print("{} Friends: {}".format(len(friends), friends))
+    print("{} Followers: {}".format(len(followers), followers))
