@@ -7,79 +7,62 @@ import tweepy
 from credentials import *
 
 class User:
+    """
+    Twitter user interface. Stores username and maintains
+    a local cache of the user's friends and followers.
+    """
     def __init__(self, username):
         self.username = username
         self.friends = []
         self.followers = []
         self.friend_cache = None
         self.follower_cache = None
-        if not os.path.exists(self.username):
-            os.mkdir(self.username)
-        self.datapath = os.path.abspath("./{}".format(self.username))
+        self.datapath = os.path.abspath("data/{}".format(self.username))
+        if not os.path.exists("data"):
+            os.mkdir("data")
+        if not os.path.exists(self.datapath):
+            os.mkdir(self.datapath)
 
     def get_friends(self, cache=True):
-        if self.friend_cache is None and not cache:
-            self.fetch_friends()
+        """
+        Return friends from local cache if possible,
+        o.w. fetch friends via the twitter API
+        """
+        if self.friend_cache is None or not cache:
+            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
+            filepath = os.path.join(self.datapath,
+            "{}-friends-{}.txt".format(self.username,timestamp))
+            self.friends = self.__fetch(api.friends, filepath)
         return self.friends
 
+
     def get_followers(self, cache=True):
-        if self.follower_cache is None and not cache:
-            self.fetch_followers()
+        """
+        Return followers from local cache if possible,
+        o.w. fetch followers via the twitter API
+        """
+        if self.follower_cache is None or not cache:
+            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
+            filepath = os.path.join(self.datapath,
+            "{}-followers-{}.txt".format(self.username,timestamp))
+            self.followers = self.__fetch(api.followers, filepath)
         return self.followers
 
-    def fetch_friends(self):
+    def __fetch(self, api_attr, out_file_path, count=200):
         """
-        Fetch the user's friends using the twitter API
+        Retrieves specified payload from the twiter API
         """
-        friends = []
-        users = tweepy.Cursor(api.friends, screen_name=self.username).items()
-        timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-        filepath = os.path.join(self.datapath,
-                   "{}-friends-{}.txt".format(self.username,timestamp))
-        with open(filepath, "w") as outfile:
-            while True:
-                try:
-                    user = next(users)
-                except tweepy.RateLimitError:
-                    print("RateLimitError...sleeping for now")
-                    time.sleep(1000)
-                    continue
-                except StopIteration:
-                    break
-                outfile.write("{}\n".format(user.screen_name))
-                friends.append(user.screen_name)
-        self.friend_cache = timestamp
-        self.friends = friends
-
-    def fetch_followers(self):
-        """
-        Fetch the user's followers using the twitter API
-        """
-        followers = []
-        users = tweepy.Cursor(api.followers, screen_name=self.username).items()
-        timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-        filepath = os.path.join(self.datapath,
-                   "{}-followers-{}.txt".format(self.username,timestamp))
-        with open(filepath, "w") as outfile:
-            while True:
-                try:
-                    user = next(users)
-                except tweepy.RateLimitError:
-                    print("RateLimitError...sleeping for now")
-                    time.sleep(1000)
-                    continue
-                except StopIteration:
-                    break
-
-                outfile.write("{}\n".format(user.screen_name))
-                followers.append(user.screen_name)
-        self.follower_cache = timestamp
-        self.followers = followers
-
+        users = []
+        for user in tweepy.Cursor(api_attr, screen_name=self.username, count=count).pages():
+            users.extend(user)
+        users = [users[i].screen_name for i in range(len(users))]
+        with open(out_file_path, "w") as of:
+            for user in users: of.write("{}\n".format(user))
+        return users
 
 if __name__ == "__main__":
     username = str(sys.argv[1])
     user = User(username)
-    user.fetch_followers()
     followers = user.get_followers()
-    print(followers)
+    friends = user.get_friends()
+    print(friends)
