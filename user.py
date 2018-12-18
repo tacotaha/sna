@@ -80,5 +80,5 @@ class User:
 if __name__ == "__main__":
     user = User("twitter")
     user.fetch_followers()
-    follwers = user.get_followers()
+    followers = user.get_followers()
     print(followers)
