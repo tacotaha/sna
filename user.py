@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import time
 import tweepy
 from credentials import *
@@ -19,15 +20,12 @@ class User:
     def get_friends(self, cache=True):
         if self.friend_cache is None and not cache:
             self.fetch_friends()
-        else:
-            return self.friends
-
+        return self.friends
 
     def get_followers(self, cache=True):
         if self.follower_cache is None and not cache:
             self.fetch_followers()
-        else:
-            return self.followers
+        return self.followers
 
     def fetch_friends(self):
         """
@@ -72,13 +70,16 @@ class User:
                     continue
                 except StopIteration:
                     break
+
+                outfile.write("{}\n".format(user.screen_name))
                 followers.append(user.screen_name)
         self.follower_cache = timestamp
         self.followers = followers
 
 
 if __name__ == "__main__":
-    user = User("twitter")
+    username = str(sys.argv[1])
+    user = User(username)
     user.fetch_followers()
     followers = user.get_followers()
     print(followers)
