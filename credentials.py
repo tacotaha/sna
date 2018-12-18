@@ -1,4 +1,6 @@
-#Twitter API credentials
+import tweepy
+
+# Twitter API credentials
 consumer_key = "YOUR CONSUMER KEY"
 consumer_secret = "YOUR CONSUMER SECRET"
 access_key = "YOUR ACCESS KEY"
