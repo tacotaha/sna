@@ -67,7 +67,7 @@ class User:
                         users[e["screen_name"]] = 1
                     else:
                         users[e["screen_name"]] += 1
-        self.mentioned_users = sorted(users.items(), key=lambda x: int(x[1]))
+        self.mentioned_users = sorted(users.items(), key=lambda x: int(x[1]), reverse=True)
         with open(filepath, "w") as outfile:
             for (user, frequency) in self.mentioned_users:
                 outfile.write("{},{}\n".format(user, frequency))
