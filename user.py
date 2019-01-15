@@ -88,7 +88,6 @@ class User:
             fname = "{}-favorites-{}.csv".format(self.username, timestamp)
             filepath = os.path.join(self.datapath, fname)
             users = {}
-            # Grab last 1000 favs or up until we get rate limited 
             try:
                 for status in tweepy.Cursor(api.favorites, screen_name=self.username, count=count).items():
                     screen_name = status.user.screen_name
