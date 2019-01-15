@@ -17,8 +17,12 @@ class User:
         self.username = username
         self.friends = []
         self.followers = []
+        self.mentioned_users = {}
+        self.favorited_users = {}
         self.friend_cache = None
         self.follower_cache = None
+        self.mentioned_cache = None
+        self.favorited_cache = None
         self.datapath = os.path.abspath("data/{}".format(self.username))
         if not os.path.exists("data"):
             os.mkdir("data")
@@ -49,37 +53,63 @@ class User:
             self.followers = self.__fetch(api.followers, filepath)
         return self.followers
 
-    def get_mentioned(self, cache=True):
+    def get_mentions(self, cache=True):
         """
         Return a list of tuples (x, y) where
         x = a username
-        y = the # of times they were mentioned
+        y = the # of times they were mentioned by the current user
         """
-        timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-        fname = "{}-mentioned-{}.csv".format(self.username, timestamp)
-        filepath = os.path.join(self.datapath, fname)
-        users = {}
-        for status in tweepy.Cursor(
-                api.user_timeline, screen_name=self.username).items():
-            if hasattr(status, "entities"):
-                for e in status.entities["user_mentions"]:
-                    if e["screen_name"] not in users:
-                        users[e["screen_name"]] = 1
-                    else:
-                        users[e["screen_name"]] += 1
-        self.mentioned_users = sorted(users.items(), key=lambda x: int(x[1]), reverse=True)
-        with open(filepath, "w") as outfile:
-            for (user, frequency) in self.mentioned_users:
-                outfile.write("{},{}\n".format(user, frequency))
+        if self.mentioned_cache is None or not cache:
+            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
+            fname = "{}-mentions-{}.csv".format(self.username, timestamp)
+            filepath = os.path.join(self.datapath, fname)
+            users = {}
+            for status in tweepy.Cursor(api.user_timeline, screen_name=self.username).items():
+                if hasattr(status, "entities"):
+                    for e in status.entities["user_mentions"]:
+                        if e["screen_name"] not in users:
+                            users[e["screen_name"]] = 1
+                        else:
+                            users[e["screen_name"]] += 1
+            self.mentioned_users = sorted(users.items(), key=lambda x: int(x[1]), reverse=True)
+            with open(filepath, "w") as outfile:
+                for (user, frequency) in self.mentioned_users:
+                    outfile.write("{},{}\n".format(user, frequency))
         return self.mentioned_users
+
+    def get_favorites(self, count=1000, cache=True):
+        """
+        Return a list of tuples (x, y) where
+        x = a username
+        y = the # of favorited tweets authored by user x
+        """
+        if self.favorited_cache is None or not cache:
+            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
+            fname = "{}-favorites-{}.csv".format(self.username, timestamp)
+            filepath = os.path.join(self.datapath, fname)
+            users = {}
+            # Grab last 1000 favs or up until we get rate limited 
+            try:
+                for status in tweepy.Cursor(api.favorites, screen_name=self.username, count=count).items():
+                    screen_name = status.user.screen_name
+                    if screen_name not in users:
+                        users[screen_name] = 1
+                    else:
+                        users[screen_name] += 1
+            except tweepy.TweepError:
+                print("Rate limited...leaving with %d favorites" % len(users))
+            self.favorited_users = sorted(users.items(), key=lambda x: int(x[1]), reverse=True)
+            with open(filepath, "w") as outfile:
+                for (user, frequency) in self.favorited_users:
+                    outfile.write("{},{}\n".format(user, frequency))
+        return self.favorited_users
 
     def __fetch(self, api_attr, out_file_path, count=200):
         """
         Retrieves specified payload from the twiter API
         """
         users = []
-        for user in tweepy.Cursor(
-                api_attr, screen_name=self.username, count=count).pages():
+        for user in tweepy.Cursor(api_attr, screen_name=self.username, count=count).pages():
             users.extend(user)
         users = [users[i].screen_name for i in range(len(users))]
         with open(out_file_path, "w") as of:
