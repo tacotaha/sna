@@ -3,9 +3,9 @@
 import argparse
 from user import User
 
-def main(username, followers, friends, mentioned):
+def main(username, followers, friends, mentions, favorites):
     user = User(username)
-    all = not followers and not friends and not mentioned
+    all = not followers and not friends and not mentions and not favorites
     if followers or all:
         user_followers = user.get_followers()
         print("=========={} Followers==========".format(len(user_followers)))
@@ -14,10 +14,15 @@ def main(username, followers, friends, mentioned):
         user_friends = user.get_friends()
         print("=========={} Friends============".format(len(user_friends)))
         print(user_friends)
-    if mentioned or all:
-        user_mentioned = user.get_mentioned()
-        print("=========={} Mentioned============".format(len(user_mentioned)))
-        print(user_mentioned)
+    if mentions or all:
+        user_mentions = user.get_mentions()
+        print("=========={} Mentioned============".format(len(user_mentions)))
+        print(user_mentions)
+    if favorites or all:
+        user_favorites = user.get_favorites()
+        print("=========={} Favorited============".format(len(user_favorites)))
+        print(user_favorites)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -26,7 +31,9 @@ if __name__ == "__main__":
                         help='Fetch the user\'s followers')
     parser.add_argument('--friends', action="store_true",
                         help='Fetch the user\'s friends')
-    parser.add_argument('--mentioned', action="store_true",
+    parser.add_argument('--mentions', action="store_true",
                         help='Fetch a list of mentioned users')
+    parser.add_argument('--favorites', action="store_true",
+                        help='Fetch a list of the users whose tweets were favorited')
     args = parser.parse_args()
-    main(args.username, args.followers, args.friends, args.mentioned)
+    main(args.username, args.followers, args.friends, args.mentions, args.favorites)
