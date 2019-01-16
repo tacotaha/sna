@@ -3,6 +3,9 @@
 import argparse
 from user import User
 
+"""
+Uses the user interface to extract a User's twitter data
+"""
 def main(username, followers, friends, mentions, favorites):
     user = User(username)
     all = not followers and not friends and not mentions and not favorites
