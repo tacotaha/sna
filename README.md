@@ -7,26 +7,26 @@
 
 1. Clone the repo
 
-```$ git clone https://github.com/tazzaoui/sna.git && cd sna```
+    ```$ git clone https://github.com/tazzaoui/sna.git && cd sna```
 
 2.  Install the necessary dependencies
 
-```$ pip install --user -r requirements.txt```
+    ```$ pip install --user -r requirements.txt```
 
 3. Head over to [https://developer.twitter.com/](https://developer.twitter.com/) to obtain API credentials. Fill in `credentials.py` accordingly
 
 4. Extract the information of a few twitter users
 
-```
-$ ./extract.py user-1
-$. ./extract.py user-2
-...
-$ ./extract.py user-n
-```
+     ```
+     $ ./extract.py user-1
+     $. ./extract.py user-2
+    ...
+    $ ./extract.py user-n
+    ```
 
 5. Visualize the conectivity of the social circle centered around those users
 
-```$ ./visualize.py```
+    ```$ ./visualize.py```
 
 # Files
 
