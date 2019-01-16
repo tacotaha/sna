@@ -35,8 +35,7 @@ class User:
         o.w. fetch friends via the twitter API
         """
         if self.friend_cache is None or not cache:
-            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-            fname = "{}-friends-{}.txt".format(self.username, timestamp)
+            fname = "friends.csv".format(self.username)
             filepath = os.path.join(self.datapath, fname)
             self.friends = self.__fetch(api.friends, filepath)
         return self.friends
@@ -47,8 +46,7 @@ class User:
         o.w. fetch followers via the twitter API
         """
         if self.follower_cache is None or not cache:
-            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-            fname = "{}-followers-{}.txt".format(self.username, timestamp)
+            fname = "followers.csv".format(self.username)
             filepath = os.path.join(self.datapath, fname)
             self.followers = self.__fetch(api.followers, filepath)
         return self.followers
@@ -60,8 +58,7 @@ class User:
         y = the # of times they were mentioned by the current user
         """
         if self.mentioned_cache is None or not cache:
-            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-            fname = "{}-mentions-{}.csv".format(self.username, timestamp)
+            fname = "mentions.csv".format(self.username)
             filepath = os.path.join(self.datapath, fname)
             users = {}
             for status in tweepy.Cursor(api.user_timeline, screen_name=self.username).items():
@@ -84,8 +81,7 @@ class User:
         y = the # of favorited tweets authored by user x
         """
         if self.favorited_cache is None or not cache:
-            timestamp = time.strftime("%Y-%m-%d-%H:%M:%S")
-            fname = "{}-favorites-{}.csv".format(self.username, timestamp)
+            fname = "favorites.csv".format(self.username)
             filepath = os.path.join(self.datapath, fname)
             users = {}
             try:
