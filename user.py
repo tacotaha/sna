@@ -2,10 +2,9 @@
 
 import os
 import sys
-import time
+import pickle
 import tweepy
 from credentials import *
-
 
 class User:
     """
@@ -35,9 +34,11 @@ class User:
         o.w. fetch friends via the twitter API
         """
         if self.friend_cache is None or not cache:
-            fname = "friends.csv".format(self.username)
-            filepath = os.path.join(self.datapath, fname)
+            filepath = os.path.join(self.datapath, "friends.csv")
+            picklepath = os.path.join(self.datapath, "friends.pkl")
             self.friends = self.__fetch(api.friends, filepath)
+            with open(picklepath, "wb") as f:
+                pickle.dump(self.friends, f)
         return self.friends
 
     def get_followers(self, cache=True):
@@ -46,9 +47,11 @@ class User:
         o.w. fetch followers via the twitter API
         """
         if self.follower_cache is None or not cache:
-            fname = "followers.csv".format(self.username)
-            filepath = os.path.join(self.datapath, fname)
+            filepath = os.path.join(self.datapath, "followers.csv")
+            picklepath = os.path.join(self.datapath, "followers.pkl")
             self.followers = self.__fetch(api.followers, filepath)
+            with open(picklepath, "wb") as f:
+                pickle.dump(self.followers, f)
         return self.followers
 
     def get_mentions(self, cache=True):
@@ -58,8 +61,8 @@ class User:
         y = the # of times they were mentioned by the current user
         """
         if self.mentioned_cache is None or not cache:
-            fname = "mentions.csv".format(self.username)
-            filepath = os.path.join(self.datapath, fname)
+            filepath = os.path.join(self.datapath, "mentions.csv")
+            picklepath = os.path.join(self.datapath, "mentions.pkl")
             users = {}
             for status in tweepy.Cursor(api.user_timeline, screen_name=self.username).items():
                 if hasattr(status, "entities"):
@@ -72,6 +75,8 @@ class User:
             with open(filepath, "w") as outfile:
                 for (user, frequency) in self.mentioned_users:
                     outfile.write("{},{}\n".format(user, frequency))
+            with open(picklepath, "wb") as f:
+                pickle.dump(self.mentioned_users, f)
         return self.mentioned_users
 
     def get_favorites(self, count=1000, cache=True):
@@ -81,8 +86,8 @@ class User:
         y = the # of favorited tweets authored by user x
         """
         if self.favorited_cache is None or not cache:
-            fname = "favorites.csv".format(self.username)
-            filepath = os.path.join(self.datapath, fname)
+            filepath = os.path.join(self.datapath, "favorites.csv")
+            picklepath = os.path.join(self.datapath, "favorites.pkl")
             users = {}
             try:
                 for status in tweepy.Cursor(api.favorites, screen_name=self.username, count=count).items():
@@ -97,6 +102,8 @@ class User:
             with open(filepath, "w") as outfile:
                 for (user, frequency) in self.favorited_users:
                     outfile.write("{},{}\n".format(user, frequency))
+            with open(picklepath, "wb") as f:
+                pickle.dump(self.favorited_users, f)
         return self.favorited_users
 
     def __fetch(self, api_attr, out_file_path, count=200):
