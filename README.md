@@ -19,7 +19,7 @@
 
      ```
      $ ./extract.py user-1
-     $. ./extract.py user-2
+     $ ./extract.py user-2
     ...
     $ ./extract.py user-n
     ```
