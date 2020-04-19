@@ -7,7 +7,7 @@
 
 1. Clone the repo
 
-    ```$ git clone https://github.com/tazzaoui/sna.git && cd sna```
+    ```$ git clone https://github.com/tacotaha/sna.git && cd sna```
 
 2.  Install the necessary dependencies
 
